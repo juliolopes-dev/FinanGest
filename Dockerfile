@@ -3,6 +3,10 @@ FROM node:20-alpine AS base
 # Build Backend
 FROM base AS backend-builder
 WORKDIR /app/backend
+
+# Instalar OpenSSL para Prisma
+RUN apk add --no-cache openssl
+
 COPY backend/package*.json ./
 RUN npm install
 COPY backend/ ./
@@ -20,6 +24,9 @@ RUN npm run build
 # Production
 FROM base AS production
 WORKDIR /app
+
+# Instalar OpenSSL para Prisma em produção
+RUN apk add --no-cache openssl
 
 # Copiar backend buildado
 COPY --from=backend-builder /app/backend/dist ./backend/dist
