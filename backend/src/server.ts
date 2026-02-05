@@ -40,18 +40,29 @@ if (process.env.NODE_ENV === 'production') {
 
 const start = async () => {
   try {
+    console.log('🔄 Iniciando servidor...')
+    console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Configurada' : 'NÃO CONFIGURADA')
+    console.log('NODE_ENV:', process.env.NODE_ENV)
+    console.log('PORT:', process.env.PORT)
+    
+    console.log('🔄 Conectando ao banco de dados...')
     await prisma.$connect()
+    console.log('✅ Conectado ao banco de dados PostgreSQL')
     fastify.log.info('✅ Conectado ao banco de dados PostgreSQL')
 
     const port = Number(process.env.PORT) || 3000
+    console.log(`🔄 Iniciando servidor na porta ${port}...`)
     await fastify.listen({ port, host: '0.0.0.0' })
     
+    console.log(`🚀 Servidor rodando em http://localhost:${port}`)
     fastify.log.info(`🚀 Servidor rodando em http://localhost:${port}`)
   } catch (err) {
+    console.error('❌ ERRO AO INICIAR SERVIDOR:', err)
     fastify.log.error(err)
     await prisma.$disconnect()
     process.exit(1)
   }
 }
 
+console.log('📦 Carregando módulos...')
 start()
