@@ -46,6 +46,9 @@ ENV TZ=America/Sao_Paulo
 
 WORKDIR /app/backend
 
+# Gerar Prisma Client em produção
+RUN npx prisma generate
+
 EXPOSE 3000
 
 CMD ["node", "dist/server.js"]
