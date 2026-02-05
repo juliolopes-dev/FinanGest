@@ -1,0 +1,30 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["auditoria_integracao"]
+}
+
+model AuditoriaVendas {
+  id             Int       @id @default(autoincrement())
+  cod_filial     String?   @db.VarChar
+  tipo_pedido    String?   @db.VarChar
+  cod_pedido     String?   @db.VarChar
+  cod_cliente    String?   @db.VarChar
+  cod_produto    String?   @db.VarChar
+  quantidade     Decimal?  @db.Decimal
+  preco_unitario Decimal?  @db.Decimal
+  data_pedido    DateTime? @db.Timestamp(6)
+  faturado       String?   @db.VarChar
+  cod_vendedor   String?   @db.VarChar
+  data_fatura    DateTime? @db.Timestamp(6)
+  hash_registro  String?   @db.VarChar
+  data_extracao  DateTime? @db.Timestamp(6)
+
+  @@map("auditoria_vendas")
+  @@schema("auditoria_integracao")
+}
