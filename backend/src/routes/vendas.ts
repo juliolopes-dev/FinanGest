@@ -28,7 +28,7 @@ export async function vendas(fastify: FastifyInstance) {
         ultimaAtualizacao: new Date().toISOString(),
       })
     } catch (error) {
-      fastify.log.error('Erro ao calcular faturamento total:', error)
+      fastify.log.error(error, 'Erro ao calcular faturamento total')
       return reply.code(500).send({
         error: 'Erro ao calcular faturamento total',
       })
@@ -43,14 +43,14 @@ export async function vendas(fastify: FastifyInstance) {
           ? Prisma.sql` AND data_fatura >= CURRENT_DATE`
           : periodo === 'month'
             ? Prisma.sql` AND data_fatura >= date_trunc('month', CURRENT_DATE)`
-            : Prisma.sql``
+            : Prisma.empty
 
       const dateFilterTrocas =
         periodo === 'day'
           ? Prisma.sql` AND data_troca >= CURRENT_DATE`
           : periodo === 'month'
             ? Prisma.sql` AND data_troca >= date_trunc('month', CURRENT_DATE)`
-            : Prisma.sql``
+            : Prisma.empty
 
       // Buscar vendas
       const vendas = await prisma.$queryRaw<Array<{ cod_filial: string; total: number; qtd_vendas: number }>>`
@@ -80,11 +80,11 @@ export async function vendas(fastify: FastifyInstance) {
 
       // Mapear trocas por filial
       const trocasMap = new Map(
-        trocas.map(t => [t.cod_filial, Number(t.total_trocas)])
+        trocas.map((t: { cod_filial: string; total_trocas: number }) => [t.cod_filial, Number(t.total_trocas)])
       )
 
       // Calcular líquido (vendas - trocas)
-      const filiais = vendas.map(row => {
+      const filiais = vendas.map((row: { cod_filial: string; total: number; qtd_vendas: number }) => {
         const totalVendas = Number(row.total)
         const totalTrocas = trocasMap.get(row.cod_filial) || 0
         const totalLiquido = totalVendas - totalTrocas
@@ -97,7 +97,7 @@ export async function vendas(fastify: FastifyInstance) {
         }
       })
 
-      const totalGeral = filiais.reduce((acc, f) => acc + f.total, 0)
+      const totalGeral = filiais.reduce((acc: number, f: { total: number }) => acc + f.total, 0)
 
       return reply.send({
         filiais,
@@ -105,7 +105,7 @@ export async function vendas(fastify: FastifyInstance) {
         ultimaAtualizacao: new Date().toISOString(),
       })
     } catch (error) {
-      fastify.log.error('Erro ao calcular faturamento por filial:', error)
+      fastify.log.error(error, 'Erro ao calcular faturamento por filial')
       return reply.code(500).send({
         error: 'Erro ao calcular faturamento por filial',
       })
@@ -120,7 +120,7 @@ export async function vendas(fastify: FastifyInstance) {
           ? Prisma.sql` AND data_movimento >= CURRENT_DATE`
           : periodo === 'month'
             ? Prisma.sql` AND data_movimento >= date_trunc('month', CURRENT_DATE)`
-            : Prisma.sql``
+            : Prisma.empty
 
       // Buscar vendas (tipo 55)
       const vendas = await prisma.$queryRaw<Array<{ cod_filial: string; total_vendas: number }>>`
@@ -148,11 +148,11 @@ export async function vendas(fastify: FastifyInstance) {
 
       // Mapear devoluções por filial
       const devolucoesMap = new Map(
-        devolucoes.map(d => [d.cod_filial, Number(d.total_devolucoes)])
+        devolucoes.map((d: { cod_filial: string; total_devolucoes: number }) => [d.cod_filial, Number(d.total_devolucoes)])
       )
 
       // Calcular líquido (vendas - devoluções)
-      const filiais = vendas.map(v => {
+      const filiais = vendas.map((v: { cod_filial: string; total_vendas: number }) => {
         const totalVendas = Number(v.total_vendas)
         const totalDevolucoes = devolucoesMap.get(v.cod_filial) || 0
         const totalLiquido = totalVendas - totalDevolucoes
@@ -166,8 +166,8 @@ export async function vendas(fastify: FastifyInstance) {
         }
       })
 
-      const totalGeralVendas = filiais.reduce((acc, f) => acc + f.totalVendas, 0)
-      const totalGeralDevolucoes = filiais.reduce((acc, f) => acc + f.totalDevolucoes, 0)
+      const totalGeralVendas = filiais.reduce((acc: number, f: { totalVendas: number }) => acc + f.totalVendas, 0)
+      const totalGeralDevolucoes = filiais.reduce((acc: number, f: { totalDevolucoes: number }) => acc + f.totalDevolucoes, 0)
       const totalGeralLiquido = totalGeralVendas - totalGeralDevolucoes
 
       return reply.send({
@@ -178,7 +178,7 @@ export async function vendas(fastify: FastifyInstance) {
         ultimaAtualizacao: new Date().toISOString(),
       })
     } catch (error) {
-      fastify.log.error('Erro ao calcular faturamento líquido:', error)
+      fastify.log.error(error, 'Erro ao calcular faturamento líquido')
       return reply.code(500).send({
         error: 'Erro ao calcular faturamento líquido',
       })
