@@ -117,9 +117,9 @@ export async function vendas(fastify: FastifyInstance) {
       const { periodo } = request.query as { periodo?: string }
       const dateFilter =
         periodo === 'day'
-          ? Prisma.sql` AND data_movimento >= CURRENT_DATE`
+          ? Prisma.sql` AND data_movimento >= (CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date`
           : periodo === 'month'
-            ? Prisma.sql` AND data_movimento >= date_trunc('month', CURRENT_DATE)`
+            ? Prisma.sql` AND data_movimento >= date_trunc('month', (CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date)`
             : Prisma.empty
 
       // Buscar vendas (tipo 55)
