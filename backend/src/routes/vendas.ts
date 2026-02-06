@@ -15,8 +15,8 @@ export async function vendas(fastify: FastifyInstance) {
     try {
       const result = await prisma.$queryRaw<Array<{ total: number }>>`
         SELECT 
-          COALESCE(SUM(quantidade * preco_unitario), 0)::numeric as total
-        FROM auditoria_integracao.auditoria_vendas
+          COALESCE(SUM(total_pedido), 0)::numeric as total
+        FROM auditoria_integracao.auditoria_pedidos
         WHERE faturado = 'S'
           AND tipo_pedido = '55'
       `
@@ -56,9 +56,9 @@ export async function vendas(fastify: FastifyInstance) {
       const vendas = await prisma.$queryRaw<Array<{ cod_filial: string; total: number; qtd_vendas: number }>>`
         SELECT 
           cod_filial,
-          COALESCE(SUM(quantidade * preco_unitario), 0)::numeric as total,
+          COALESCE(SUM(total_pedido), 0)::numeric as total,
           COUNT(DISTINCT cod_pedido)::integer as qtd_vendas
-        FROM auditoria_integracao.auditoria_vendas
+        FROM auditoria_integracao.auditoria_pedidos
         WHERE faturado = 'S'
           AND tipo_pedido = '55'
           ${dateFilterVendas}
